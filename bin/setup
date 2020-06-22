@@ -9,6 +9,7 @@ require 'csv'
 
 
 puts "\n== Preparing database =="
+puts "\n== Await!! =="
 
 begin
   db = SQLite3::Database.open "db/database.db"
@@ -22,13 +23,16 @@ begin
   SQL
 
 
-  CSV.foreach('data/populacao_2019.csv', col_sep: ',').with_index do |linha, indice|
-    unless (indice == 0)
-      db.execute "INSERT INTO Populacao VALUES ( ?, ?, ?, ? )", linha
+  unless(db.execute('SELECT count(*) FROM Populacao')[0][0] > 0)
+    puts 'populando o banco'
+    CSV.foreach('data/populacao_2019.csv', col_sep: ',').with_index do |linha, indice|
+      unless (indice == 0)
+        db.execute "INSERT INTO Populacao VALUES ( ?, ?, ?, ? )", linha
+      end
     end
   end
-
-
+puts "\n== Database Ready =="
+# db.execute('DROP TABLE Populacao')
 
 rescue SQLite3::Exception => e
   puts e
